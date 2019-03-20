@@ -1,15 +1,19 @@
 # org.wikimedia.thethe
 
-![Screenshot](/images/screenshot.png)
+![Screenshot](images/admin_config.png)
 
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+This extension alters the sort name saved for organisations. It allows you to remove the 'The' from the beginning. The sort name is used from quicksearch so removing optional strings makes it easier for users to search and to realise the contact already exists with or without the 'the'.
+
+Having standardised sort names is also useful for doing deduping - sort_name can be used as a field in a rule and The Justice League can then be deduped with Justice League.
+
+The extension also permits suffixes to be removed or strings to be removed from anywhere in the sort name.
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
 ## Requirements
 
-* PHP v5.6+
-* CiviCRM (*FIXME: Version number*)
+* PHP v7.1+
+* CiviCRM 5.13+
 
 ## Installation (Web UI)
 
@@ -37,8 +41,12 @@ cv en thethe
 
 ## Usage
 
-(* FIXME: Where would a new user navigate to get started? What changes would they see? *)
+If you install this it will start removing the The from the start of the sort name
+of any organization that is created or edited. This difference will be most noticeable
+from quicksearch - especially in organizations that have turned off the Automatic Wildcard 
+search setting (turning this off gives a substantial performance improvement on larger sites)
 
 ## Known Issues
 
-(* FIXME *)
+This only addresses Organizations. It could easily be extended to Households but more
+core changes would be needed for any changes to Individuals.
