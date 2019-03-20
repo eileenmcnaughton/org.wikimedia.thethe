@@ -16,7 +16,7 @@ return [
       'size' => 50,
     ],
     'default' => "'The '",
-    'settings_pages' => ['thethe' => ['weight' => 20]],
+    'settings_pages' => ['thethe' => ['weight' => 20], 'search' => ['weight' => 20]],
   ],
   'thethe_org_suffix_strings' => [
     'group' => 'thethe',
@@ -31,7 +31,7 @@ return [
     'html_attributes' => [
       'size' => 50,
     ],
-    'settings_pages' => ['thethe' => ['weight' => 30]],
+    'settings_pages' => ['thethe' => ['weight' => 30], 'search' => ['weight' => 30]],
   ],
   'thethe_org_anywhere_strings' => [
     'group' => 'thethe',
@@ -46,6 +46,6 @@ return [
     'html_attributes' => [
       'size' => 50,
     ],
-    'settings_pages' => ['thethe' => ['weight' => 40]],
+    'settings_pages' => ['thethe' => ['weight' => 40], 'search' => ['weight' => 40]],
   ],
 ];
