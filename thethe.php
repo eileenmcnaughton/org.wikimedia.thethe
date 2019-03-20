@@ -216,15 +216,15 @@ function thethe_civicrm_preProcess($formName, &$form) {
  * Implements hook_civicrm_navigationMenu().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
+ */
 function thethe_civicrm_navigationMenu(&$menu) {
-  _thethe_civix_insert_navigation_menu($menu, 'Mailings', array(
-    'label' => E::ts('New subliminal message'),
-    'name' => 'mailing_subliminal_message',
-    'url' => 'civicrm/mailing/subliminal',
-    'permission' => 'access CiviMail',
+  _thethe_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', array(
+    'label' => E::ts('Organization sort name Settings'),
+    'name' => 'the_the_settings',
+    'url' => 'civicrm/admin/setting/thethe',
+    'permission' => 'administer CiviCRM',
     'operator' => 'OR',
     'separator' => 0,
   ));
   _thethe_civix_navigationMenu($menu);
-} // */
+}
