@@ -163,8 +163,8 @@ function thethe_civicrm_pre($op, $objectName, $id, &$params) {
       foreach (thethe_get_setting('anywhere') as $string) {
         $params['sort_name'] = str_replace($string, '', $params['sort_name']);
       }
+      $params['sort_name'] = trim($params['sort_name']);
     }
-    $params['sort_name'] = trim($params['sort_name']);
   }
 }
 
