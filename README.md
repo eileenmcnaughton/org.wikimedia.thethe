@@ -8,7 +8,12 @@ Having standardised sort names is also useful for doing deduping - sort_name can
 
 The extension also permits suffixes to be removed or strings to be removed from anywhere in the sort name. The prefixes and suffixes to be replaced can be configured under **Administer->Customize Data and Screens->Organization Sort Name Settings** (per the screenshot above).
 
-Note: The patterns are applied *in order*. So prefixes of `'the ', 'the university of '`will not fix `The University of Life`, because once the 'the' is removed, the second pattern no longer matches. So you would need to swap the order (or use just `'university of '` instead which *would* apply).
+Notes:
+
+- The patterns are applied *in order*. So prefixes of `'the ', 'the university of '`will not fix `The University of Life`, because once the 'the' is removed, the second pattern no longer matches. So you would need to swap the order (or use just `'university of '` instead which *would* apply).
+
+- If you want to replace single quotes you have to 'escape' them with 
+  a backslash. For example, you could enter `"'\'s'"` as an anywhere pattern to change "Mary's" to "Mary". If doing this also watchout that *Mary’s* is not the same as *Mary's* and would need another pattern for the ’ character!
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
@@ -61,9 +66,10 @@ This can be useful to figure out if you put the spaces in the right places etc.
 - This only addresses Organizations. It could easily be extended to Households but more
 core changes would be needed for any changes to Individuals.
 
-- The prefix and suffix patterns you choose are not case-sensitive; entering 
-  `'The '` is the same as entering `'the '`. The *anywhere* patterns will only be removed if the `organization_name` contains the *lowercase* version of the pattern. So an anywhere pattern of 'and' will not remove from 'This And That'.
+- The *prefix* and *suffix* patterns you choose are **not** case-sensitive; entering `'The '` as a pattern is the same as entering `'the '`.
 
+- The *anywhere* patterns will only be removed if the `organization_name` 
+  contains the *lowercase* version of the pattern. So an anywhere pattern of 'and ' will not remove *and* from an organisation called 'This And That'.
 
 ## Changes
 
