@@ -41,27 +41,37 @@ function thethe_civicrm_enable() {
 function thethe_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName === 'Organization') {
     if (isset($params['organization_name'])) {
-
-      $params['sort_name'] = $params['organization_name'];
-      foreach (thethe_get_setting('prefix') as $string) {
-        if (strtolower(substr($params['sort_name'], 0, strlen($string))) === $string) {
-          $params['sort_name'] = substr($params['sort_name'], strlen($string));
-        }
-      }
-
-      foreach (thethe_get_setting('suffix') as $string) {
-        $suffixStart = strlen($params['sort_name']) - strlen($string);
-        if (strtolower(substr($params['sort_name'], $suffixStart, strlen($string))) === $string) {
-          $params['sort_name'] = substr($params['sort_name'], 0, $suffixStart);
-        }
-      }
-
-      foreach (thethe_get_setting('anywhere') as $string) {
-        $params['sort_name'] = str_replace($string, '', $params['sort_name']);
-      }
-      $params['sort_name'] = trim($params['sort_name']);
+      $params['sort_name'] = thethe_munge($params['organization_name']);
     }
   }
+}
+
+/**
+ * Return our munged sort name for the given Organization name.
+ */
+function thethe_munge(string $orgName): string {
+
+  $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+
+  foreach (thethe_get_setting('prefix') as $string) {
+    if ($toLowerCase(substr($orgName, 0, strlen($string))) === $string) {
+      $orgName = substr($orgName, strlen($string));
+    }
+  }
+
+  foreach (thethe_get_setting('suffix') as $string) {
+    $suffixStart = strlen($orgName) - strlen($string);
+    if ($toLowerCase(substr($orgName, $suffixStart, strlen($string))) === $string) {
+      $orgName = substr($orgName, 0, $suffixStart);
+    }
+  }
+
+  foreach (thethe_get_setting('anywhere') as $string) {
+    $orgName = str_replace($string, '', $orgName);
+  }
+  $orgName = trim($orgName);
+
+  return $orgName;
 }
 
 /**
@@ -71,7 +81,7 @@ function thethe_civicrm_pre($op, $objectName, $id, &$params) {
  *  - the
  *  - 'the '
  *  - 'the ', 'a ',
- *  - ['the ']
+ *  - ['the '] (i.e. a PHP array)
  *
  * @param string $settingName
  *   - prefix
@@ -84,15 +94,36 @@ function thethe_civicrm_pre($op, $objectName, $id, &$params) {
  * @return array
  */
 function thethe_get_setting($settingName, $entity = 'org') {
-  $strings = Civi::settings()->get('thethe_' . $entity . '_' . $settingName . '_strings');
+  return thethe_parse_setting_value(
+    Civi::settings()->get('thethe_' . $entity . '_' . $settingName . '_strings')
+  );
+}
+
+function thethe_parse_setting_value($strings): array {
   if (empty($strings)) {
     return [];
   }
   if (!is_array($strings)) {
-    $strings = explode(',', $strings);
-  }
-  foreach ($strings as $index => $string) {
-    $strings[$index] = strtolower(trim($string, "'"));
+    // Parse single-quoted CSV
+    $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+    $remaining = $toLowerCase(trim((string) $strings));
+    $strings = [];
+
+    while ($remaining) {
+      if (preg_match('/^\'(.+?)(?<!\\\)\'/', $remaining, $matches)) {
+        // Found quoted string.
+        $strings[] = str_replace("\\'", "'", $matches[1]);
+        // Remove the 'quoted' and any trailing comma or space
+        $remaining = ltrim(substr($remaining, strlen($matches[0])), ' ,');
+      }
+      elseif (preg_match('/^(.+)(,|$)/', $remaining, $matches)) {
+        $strings[] = $matches[1];
+        $remaining = ltrim(substr($remaining, strlen($matches[0])), ' ,');
+      }
+      else {
+        Civi::log()->warning("Invalid TheThe pattern: $remaining");
+      }
+    }
   }
   return $strings;
 }
@@ -104,8 +135,8 @@ function thethe_get_setting($settingName, $entity = 'org') {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
  *
-
- // */
+ *
+ * // */
 
 /**
  * Implements hook_civicrm_navigationMenu().
