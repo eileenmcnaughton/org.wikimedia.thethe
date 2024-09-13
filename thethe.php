@@ -81,7 +81,7 @@ function thethe_munge(string $orgName): string {
  *  - the
  *  - 'the '
  *  - 'the ', 'a ',
- *  - ['the ']
+ *  - ['the '] (i.e. a PHP array)
  *
  * @param string $settingName
  *   - prefix

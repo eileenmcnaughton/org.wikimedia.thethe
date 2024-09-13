@@ -58,9 +58,9 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
   /**
    */
   public function testCaseRules() {
-    Civi::settings()->set('thethe_org_prefix_strings', 'université de');
-    Civi::settings()->set('thethe_org_suffix_strings', ' Ltd');
-    Civi::settings()->set('thethe_org_anywhere_strings', ' and');
+    Civi::settings()->set('thethe_org_prefix_strings', "'université de'");
+    Civi::settings()->set('thethe_org_suffix_strings', "' Ltd'");
+    Civi::settings()->set('thethe_org_anywhere_strings', "' and'");
 
     // Test mbstring support.
     if (!function_exists('mb_strtolower')) {
@@ -74,6 +74,29 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
 
     // This test documents current behaviour; I'm not sure if this is *desired* behaviour or not.
     $this->assertEquals('This And That', thethe_munge('This And That'));
+  }
+
+  /**
+   * Test parsing the settings string/array.
+   *
+   * @dataProvider getSettingsData
+   */
+  public function testParseSetting($patternsString, $expectedArray) {
+    $this->assertEquals($expectedArray, thethe_parse_setting_value($patternsString));
+  }
+
+  /**
+   * Data provider for testGetSettings
+   */
+  protected function getSettingsData(): array {
+    return [
+      'empty string means no patterns' => ['', []],
+      'pattern with comma is ok' => ["','", [',']],
+      'unquoted' => ['the', ['the']],
+      'quoted' => ["'the '", ['the ']],
+      'php array' => [['the '], ['the ']],
+      'quoted csv empty item' => ["'the ','a ',", ['the ', 'a ']],
+    ];
   }
 
 }
