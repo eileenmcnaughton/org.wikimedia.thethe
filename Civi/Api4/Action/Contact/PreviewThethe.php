@@ -1,4 +1,5 @@
 <?php
+
 namespace Civi\Api4\Action\Contact;
 
 use Civi\Api4\Generic\AbstractAction;
@@ -17,9 +18,12 @@ class PreviewThethe extends AbstractAction {
         ->addWhere('organization_name', 'LIKE', "$string%")
         ->setLimit(1)
         ->execute()->first();
-      $testCases[$contact['id']] = $contact['organization_name'];
+      if ($contact) {
+        $testCases[$contact['id']] = $contact['organization_name'];
+      }
     }
 
+    $notes = [];
     foreach (thethe_get_setting('suffix') as $string) {
       $contact = Contact::get()
         ->addSelect('organization_name')
@@ -27,7 +31,10 @@ class PreviewThethe extends AbstractAction {
         ->addWhere('organization_name', 'LIKE', "%$string")
         ->setLimit(1)
         ->execute()->first();
-      $testCases[$contact['id']] = $contact['organization_name'];
+      if ($contact) {
+        $testCases[$contact['id']] = $contact['organization_name'];
+      }
+      // $notes[] = "ct $contact[organization_name] included for suffix '$string'";
     }
 
     foreach (thethe_get_setting('anywhere') as $string) {
@@ -37,12 +44,14 @@ class PreviewThethe extends AbstractAction {
         ->addWhere('organization_name', 'LIKE', "%$string%")
         ->setLimit(1)
         ->execute()->first();
-      $testCases[$contact['id']] = $contact['organization_name'];
+      if ($contact) {
+        $testCases[$contact['id']] = $contact['organization_name'];
+      }
     }
 
     foreach ($testCases as $ctID => $orgName) {
       $result[] = ['contact_id' => $ctID, 'organization_name' => $orgName, 'sort_name' => thethe_munge($orgName)];
     }
+    // $result['notes'] = $notes;
   }
-
 }
