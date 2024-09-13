@@ -55,4 +55,14 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
     $this->assertEquals('Top 10', $organization['sort_name']);
   }
 
+  /**
+   */
+  public function testCaseRules() {
+    Civi::settings()->set('thethe_org_prefix_strings', 'université de');
+    Civi::settings()->set('thethe_org_suffix_strings', 'Ltd');
+    Civi::settings()->set('thethe_org_anywhere_strings', ['and']);
+
+    $this->assertEquals('Life', thethe_munge('UNIVERSITÉ de Life LTD'));
+    $this->assertEquals('This And That', thethe_munge('The And That'));
+  }
 }
