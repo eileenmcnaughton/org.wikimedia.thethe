@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\Contact;
 use CRM_Thethe_ExtensionUtil as E;
 use Civi\Test\HeadlessInterface;
 use Civi\Test\HookInterface;
@@ -22,6 +23,8 @@ use Civi\Test\TransactionalInterface;
 class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
 
   use Civi\Test\Api3TestTrait;
+
+  protected $contactIdsToDelete = [];
 
   /**
    * Set up for headless tests.
@@ -98,6 +101,68 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
       'quoted csv empty item' => ["'the ','a ',", ['the ', 'a ']],
       'Can include single quotes escaped with backslash' => ["'\\''", ["'"]],
     ];
+  }
+
+  /**
+   * Test the Contact.applyThethe action.
+   */
+  public function testApply() {
+    // Do nothing for now.
+    Civi::settings()->set('thethe_org_suffix_strings', '');
+    Civi::settings()->set('thethe_org_anywhere_strings', '');
+    Civi::settings()->set('thethe_org_prefix_strings', '');
+    $contacts = Contact::save(FALSE)
+      ->setDefaults([
+        'contact_type' => 'Organization',
+      ])
+      ->setRecords([
+        ['organization_name' => 'The org'],
+        ['organization_name' => 'The org Ltd.'],
+        ['organization_name' => 'This is fine'],
+      ])
+      ->execute()->column('id', 'organization_name');
+    $this->contactIdsToDelete = array_keys($contacts);
+
+    Civi::settings()->set('thethe_org_prefix_strings', 'The ');
+    Civi::settings()->set('thethe_org_anywhere_strings', '');
+    Civi::settings()->set('thethe_org_suffix_strings', ' Ltd.');
+
+    $results = Contact::applyThethe(FALSE)->addWhere('id', '>', 0)->execute()->column('sort_name', 'organization_name');
+    // We expect 2 rows returned because only 2 needed changing.
+    $this->assertCount(2, $results);
+    $this->assertEquals($results['The org'], 'org');
+    $this->assertEquals($results['The org Ltd.'], 'org');
+
+    // Reload to check the data was written as expected.
+    $reloaded = Contact::get(FALSE)
+      ->addSelect('organization_name', 'sort_name')
+      ->addWhere('id', 'IN', $contacts)
+      ->execute()->column('sort_name', 'organization_name');
+    $this->assertEquals($reloaded['The org'], 'org');
+    $this->assertEquals($reloaded['The org Ltd.'], 'org');
+    $this->assertEquals($reloaded['This is fine'], 'This is fine');
+
+    // Force all sort_name fields to be recreated.
+    $results = Contact::applyThethe(FALSE)
+      ->setWhereApplicable(FALSE)
+      ->addWhere('id', 'IN', $contacts)
+      ->execute()
+      ->column('sort_name', 'organization_name');
+    // We expect 3 rows returned this time.
+    $this->assertCount(3, $results);
+    $this->assertEquals($results['The org'], 'org');
+    $this->assertEquals($results['The org Ltd.'], 'org');
+    $this->assertEquals($results['This is fine'], 'This is fine');
+  }
+
+  public function tearDown(): void {
+    if ($this->contactIdsToDelete) {
+      Contact::delete(FALSE)
+        ->setUseTrash(FALSE)
+        ->addWhere('id', 'IN', $this->contactIdsToDelete)
+        ->execute();
+    }
+    parent::tearDown();
   }
 
 }
