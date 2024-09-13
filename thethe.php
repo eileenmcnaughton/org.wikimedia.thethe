@@ -105,13 +105,14 @@ function thethe_parse_setting_value($strings): array {
   }
   if (!is_array($strings)) {
     // Parse single-quoted CSV
-    $remaining = trim((string) $strings);
+    $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+    $remaining = $toLowerCase(trim((string) $strings));
     $strings = [];
 
     while ($remaining) {
       if (preg_match('/^\'(.+?)(?<!\\\)\'/', $remaining, $matches)) {
         // Found quoted string.
-        $strings[] = $matches[1];
+        $strings[] = str_replace("\\'", "'", $matches[1]);
         // Remove the 'quoted' and any trailing comma or space
         $remaining = ltrim(substr($remaining, strlen($matches[0])), ' ,');
       }
@@ -123,10 +124,6 @@ function thethe_parse_setting_value($strings): array {
         Civi::log()->warning("Invalid TheThe pattern: $remaining");
       }
     }
-  }
-  $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
-  foreach ($strings as $index => $string) {
-    $strings[$index] = $toLowerCase(trim($string, "'"));
   }
   return $strings;
 }

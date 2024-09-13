@@ -96,6 +96,7 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
       'quoted' => ["'the '", ['the ']],
       'php array' => [['the '], ['the ']],
       'quoted csv empty item' => ["'the ','a ',", ['the ', 'a ']],
+      'Can include single quotes escaped with backslash' => ["'\\''", ["'"]],
     ];
   }
 
