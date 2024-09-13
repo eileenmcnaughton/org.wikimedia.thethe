@@ -59,10 +59,21 @@ class TheTheTest extends \PHPUnit\Framework\TestCase implements HeadlessInterfac
    */
   public function testCaseRules() {
     Civi::settings()->set('thethe_org_prefix_strings', 'université de');
-    Civi::settings()->set('thethe_org_suffix_strings', 'Ltd');
-    Civi::settings()->set('thethe_org_anywhere_strings', ['and']);
+    Civi::settings()->set('thethe_org_suffix_strings', ' Ltd');
+    Civi::settings()->set('thethe_org_anywhere_strings', ' and');
 
+    // Test mbstring support.
+    if (!function_exists('mb_strtolower')) {
+      $this->markTestSkipped('Cannot test mbstring functions; not installed');
+      return;
+    }
     $this->assertEquals('Life', thethe_munge('UNIVERSITÉ de Life LTD'));
-    $this->assertEquals('This And That', thethe_munge('The And That'));
+
+    // This test is expected.
+    $this->assertEquals('This That', thethe_munge('This and That'));
+
+    // This test documents current behaviour; I'm not sure if this is *desired* behaviour or not.
+    $this->assertEquals('This And That', thethe_munge('This And That'));
   }
+
 }
