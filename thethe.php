@@ -51,15 +51,17 @@ function thethe_civicrm_pre($op, $objectName, $id, &$params) {
  */
 function thethe_munge(string $orgName): string {
 
+  $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+
   foreach (thethe_get_setting('prefix') as $string) {
-    if (strtolower(substr($orgName, 0, strlen($string))) === $string) {
+    if ($toLowerCase(substr($orgName, 0, strlen($string))) === $string) {
       $orgName = substr($orgName, strlen($string));
     }
   }
 
   foreach (thethe_get_setting('suffix') as $string) {
     $suffixStart = strlen($orgName) - strlen($string);
-    if (strtolower(substr($orgName, $suffixStart, strlen($string))) === $string) {
+    if ($toLowerCase(substr($orgName, $suffixStart, strlen($string))) === $string) {
       $orgName = substr($orgName, 0, $suffixStart);
     }
   }
@@ -99,8 +101,9 @@ function thethe_get_setting($settingName, $entity = 'org') {
   if (!is_array($strings)) {
     $strings = explode(',', $strings);
   }
+  $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
   foreach ($strings as $index => $string) {
-    $strings[$index] = strtolower(trim($string, "'"));
+    $strings[$index] = $toLowerCase(trim($string, "'"));
   }
   return $strings;
 }
