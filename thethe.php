@@ -94,12 +94,35 @@ function thethe_munge(string $orgName): string {
  * @return array
  */
 function thethe_get_setting($settingName, $entity = 'org') {
-  $strings = Civi::settings()->get('thethe_' . $entity . '_' . $settingName . '_strings');
+  return thethe_parse_setting_value(
+    Civi::settings()->get('thethe_' . $entity . '_' . $settingName . '_strings')
+  );
+}
+
+function thethe_parse_setting_value($strings): array {
   if (empty($strings)) {
     return [];
   }
   if (!is_array($strings)) {
-    $strings = explode(',', $strings);
+    // Parse single-quoted CSV
+    $remaining = trim((string) $strings);
+    $strings = [];
+
+    while ($remaining) {
+      if (preg_match('/^\'(.+?)(?<!\\\)\'/', $remaining, $matches)) {
+        // Found quoted string.
+        $strings[] = $matches[1];
+        // Remove the 'quoted' and any trailing comma or space
+        $remaining = ltrim(substr($remaining, strlen($matches[0])), ' ,');
+      }
+      elseif (preg_match('/^(.+)(,|$)/', $remaining, $matches)) {
+        $strings[] = $matches[1];
+        $remaining = ltrim(substr($remaining, strlen($matches[0])), ' ,');
+      }
+      else {
+        Civi::log()->warning("Invalid TheThe pattern: $remaining");
+      }
+    }
   }
   $toLowerCase = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
   foreach ($strings as $index => $string) {
