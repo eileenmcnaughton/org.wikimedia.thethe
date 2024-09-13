@@ -41,27 +41,35 @@ function thethe_civicrm_enable() {
 function thethe_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName === 'Organization') {
     if (isset($params['organization_name'])) {
-
-      $params['sort_name'] = $params['organization_name'];
-      foreach (thethe_get_setting('prefix') as $string) {
-        if (strtolower(substr($params['sort_name'], 0, strlen($string))) === $string) {
-          $params['sort_name'] = substr($params['sort_name'], strlen($string));
-        }
-      }
-
-      foreach (thethe_get_setting('suffix') as $string) {
-        $suffixStart = strlen($params['sort_name']) - strlen($string);
-        if (strtolower(substr($params['sort_name'], $suffixStart, strlen($string))) === $string) {
-          $params['sort_name'] = substr($params['sort_name'], 0, $suffixStart);
-        }
-      }
-
-      foreach (thethe_get_setting('anywhere') as $string) {
-        $params['sort_name'] = str_replace($string, '', $params['sort_name']);
-      }
-      $params['sort_name'] = trim($params['sort_name']);
+      $params['sort_name'] = thethe_munge($params['organization_name']);
     }
   }
+}
+
+/**
+ * Return our munged sort name for the given Organization name.
+ */
+function thethe_munge(string $orgName): string {
+
+  foreach (thethe_get_setting('prefix') as $string) {
+    if (strtolower(substr($orgName, 0, strlen($string))) === $string) {
+      $orgName = substr($orgName, strlen($string));
+    }
+  }
+
+  foreach (thethe_get_setting('suffix') as $string) {
+    $suffixStart = strlen($orgName) - strlen($string);
+    if (strtolower(substr($orgName, $suffixStart, strlen($string))) === $string) {
+      $orgName = substr($orgName, 0, $suffixStart);
+    }
+  }
+
+  foreach (thethe_get_setting('anywhere') as $string) {
+    $orgName = str_replace($string, '', $orgName);
+  }
+  $orgName = trim($orgName);
+
+  return $orgName;
 }
 
 /**
@@ -104,8 +112,8 @@ function thethe_get_setting($settingName, $entity = 'org') {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
  *
-
- // */
+ *
+ * // */
 
 /**
  * Implements hook_civicrm_navigationMenu().
