@@ -144,13 +144,13 @@ function thethe_parse_setting_value($strings): array {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
  */
 function thethe_civicrm_navigationMenu(&$menu) {
-  _thethe_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', array(
+  _thethe_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', [
     'label' => E::ts('Organization sort name Settings'),
     'name' => 'the_the_settings',
     'url' => 'civicrm/admin/setting/thethe',
     'permission' => 'administer CiviCRM',
     'operator' => 'OR',
     'separator' => 0,
-  ));
+  ]);
   _thethe_civix_navigationMenu($menu);
 }
